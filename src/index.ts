@@ -270,7 +270,7 @@ const replaceToolErrorMessage = (
 }
 
 export const BrowserMCPPlugin = Plugin.define({
-  id: "opencode-browser",
+  id: "opencode-browser-v2",
   async setup(ctx) {
     const browserSessions = new Set<string>()
     const registrations: Array<{ dispose: () => Promise<void> }> = []

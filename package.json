@@ -1,5 +1,5 @@
 {
-  "name": "opencode-browser",
+  "name": "@wypratama/opencode-browser-v2",
   "version": "2.0.0",
   "description": "OpenCode plugin that integrates Browser MCP for browser automation",
   "type": "module",
@@ -21,7 +21,9 @@
     "automation",
     "browser-control",
     "web-automation",
-    "puppeteer-alternative"
+    "puppeteer-alternative",
+    "opencode-v2",
+    "browsermcp"
   ],
   "author": "",
   "license": "MIT",
@@ -35,11 +37,11 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/michaljach/opencode-browser.git"
+    "url": "git+https://github.com/wypratama/opencode-browser.git"
   },
-  "homepage": "https://github.com/michaljach/opencode-browser#readme",
+  "homepage": "https://github.com/wypratama/opencode-browser#readme",
   "bugs": {
-    "url": "https://github.com/michaljach/opencode-browser/issues"
+    "url": "https://github.com/wypratama/opencode-browser/issues"
   },
   "files": [
     "bin/",

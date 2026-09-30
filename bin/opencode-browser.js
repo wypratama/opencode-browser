@@ -5,7 +5,7 @@ import { homedir } from "node:os"
 import { dirname, resolve } from "node:path"
 
 const schemaUrl = "https://opencode.ai/config.json"
-const pluginName = "opencode-browser"
+const pluginName = "@wypratama/opencode-browser-v2"
 const browserMcpVersion = "0.1.3"
 const legacyBrowserMcpCommand = ["npx", "-y", "@browsermcp/mcp@latest"]
 const defaultBrowserMcpConfig = {

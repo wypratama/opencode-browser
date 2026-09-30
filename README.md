@@ -2,6 +2,21 @@
 
 An OpenCode plugin that integrates [Browser MCP](https://browsermcp.io) to enable browser automation capabilities within OpenCode. This plugin allows the AI to control a browser, navigate websites, fill forms, click elements, and perform other browser automation tasks.
 
+> **This is a fork of [`michaljach/opencode-browser`](https://github.com/michaljach/opencode-browser), ported to the OpenCode V2 plugin API.**
+> Original work and copyright © the `opencode-browser` contributors, MIT licensed.
+> Upstream is maintained at version 1.2.3 and does not support OpenCode V2 — see
+> [upstream issue #3](https://github.com/michaljach/opencode-browser/issues/3).
+> This fork exists because upstream has had no commits since April 2026 and
+> because the V2 port required correctness fixes that upstream could not accept
+> without a breaking release. Please prefer upstream if your OpenCode version is V1.
+
+## Install
+
+```bash
+# from this fork (no npm publish required)
+opencode plugin add github:wypratama/opencode-browser-v2
+```
+
 ## Demo
 
 ![Demo](assets/demo.gif)
