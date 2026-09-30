@@ -5,6 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.0] - 2026-09-30
+
+### Changed
+- **Breaking:** Migrated to the OpenCode V2 plugin API. The plugin is now exported as `Plugin.define({ id, setup })` instead of a bare async function, and the peer dependency moved from `@opencode-ai/plugin` to `@opencode/plugin >=2.0.0`.
+- Replaced the V1 hooks `experimental.chat.system.transform`, `tool.definition`, `tool.execute.after`, and `experimental.session.compacting` with `session.hook("context")`, `tool.transform`, `tool.hook("execute.after")`, and `session.hook("compaction")`.
+- Added the exact `@browsermcp/mcp@0.1.3` WebSocket failure strings (`WebSocket is not open`, `WebSocket error occurred`, `WebSocket response timeout after 30000ms`) to connection detection. A dropped extension could previously surface as an ordinary tool failure and never reach the skip-backoff path.
+- Connection health is now tracked process-wide rather than per session. `@browsermcp/mcp@0.1.3` holds a single WebSocket-backed context per server process, so a failure in one session left other sessions believing the browser was still reachable.
+- Browser context now survives compaction through the per-request `context` hook rather than the compaction hook's system text, which OpenCode V2 does not carry into the resumed session.
+- Read the V2 `session.deleted` payload as `event.data.sessionID`; V1 exposed a top-level `sessionID`.
+- Added a `typecheck` script and TypeScript dev dependencies so the plugin is verified to compile.
+
+### Fixed
+- A non-connection tool failure no longer resets connection state or emits a spurious "Connection restored." message.
+- Completed tool results are no longer scanned for connection-error text. Page content and console output can contain phrases such as "failed to connect" or "ECONNREFUSED" and were being misread as a dropped browser connection.
+- Results reporting `ok: true` or `success: true` are never treated as failures.
+- Added a Code Mode note explaining that catalog listings render only each tool's first description line, so the appended `Performance:` guidance is not visible there.
+
 ## [1.2.3] - 2026-04-29
 
 ### Fixed

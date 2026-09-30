@@ -52,29 +52,33 @@ This document describes the architecture and data flow of the OpenCode Browser M
 ┌─────────────────────────────────────────────────────────────────┐
 │              Browser MCP Plugin (index.ts)                       │
 │  ┌──────────────────────────────────────────────────────────┐  │
-│  │  Hook: tool.execute.before                               │  │
-│  │  • Logs browser tool invocation                          │  │
-│  │  • Validates parameters                                  │  │
-│  │  • Can modify tool arguments                             │  │
+│  │  Hook: session.hook("context")                           │  │
+│  │  • Injects browser speed guidance                        │  │
+│  │  • Adds per-tool performance hints                       │  │
 │  └──────────────────────────────────────────────────────────┘  │
 │                                                                  │
 │  ┌──────────────────────────────────────────────────────────┐  │
-│  │  Hook: tool.execute.after                                │  │
-│  │  • Logs browser tool results                             │  │
-│  │  • Can process/transform results                         │  │
-│  │  • Triggers custom actions                               │  │
+│  │  Hook: tool.transform                                    │  │
+│  │  • Appends a Performance: note to                        │  │
+│  │  • Each browser tool description                         │  │
 │  └──────────────────────────────────────────────────────────┘  │
 │                                                                  │
 │  ┌──────────────────────────────────────────────────────────┐  │
-│  │  Hook: experimental.session.compacting                   │  │
+│  │  Hook: tool.hook("execute.after")                        │  │
+│  │  • Detects a lost extension connection                   │  │
+│  │  • Appends recovery guidance to results                  │  │
+│  └──────────────────────────────────────────────────────────┘  │
+│                                                                  │
+│  ┌──────────────────────────────────────────────────────────┐  │
+│  │  Hook: session.hook("compaction")                        │  │
 │  │  • Preserves browser state context                       │  │
 │  │  • Injects continuation prompts                          │  │
 │  └──────────────────────────────────────────────────────────┘  │
 │                                                                  │
 │  ┌──────────────────────────────────────────────────────────┐  │
-│  │  Hook: session.created, event                            │  │
+│  │  Hook: event.subscribe                                   │  │
 │  │  • Session lifecycle management                          │  │
-│  │  • Event-driven actions                                  │  │
+│  │  • Clears state on session.deleted                       │  │
 │  └──────────────────────────────────────────────────────────┘  │
 └────────────────────────────┬────────────────────────────────────┘
                              │
@@ -141,11 +145,11 @@ This document describes the architecture and data flow of the OpenCode Browser M
 - Enables custom post-processing
 
 **Key Hooks**:
-- `tool.execute.before`: Pre-process tool calls
-- `tool.execute.after`: Post-process results
-- `experimental.session.compacting`: Context preservation
-- `session.created`: Session initialization
-- `event`: Event handling
+- `session.hook("context")`: Speed guidance and per-tool hints
+- `tool.transform`: Per-tool performance hints
+- `tool.hook("execute.after")`: Connection-failure detection and recovery hints
+- `session.hook("compaction")`: Context preservation
+- `event.subscribe`: Session lifecycle handling
 
 ### 4. Browser MCP Server
 **Responsibility**: Protocol translation
@@ -199,7 +203,7 @@ Extension returns: { "success": true, "url": "https://github.com" }
     ↓
 MCP Server returns result to OpenCode
     ↓
-Plugin Hook (tool.execute.after)
+Plugin Hook (tool.hook("execute.after"))
     • Logs: "Completed browser tool: browsermcp_navigate"
     ↓
 LLM receives result → formats response
@@ -234,7 +238,7 @@ Long session with multiple browser interactions
     ↓
 OpenCode detects session needs compaction
     ↓
-Plugin Hook (experimental.session.compacting)
+Plugin Hook (session.hook("compaction"))
     • Detects browser tools were used
     • Injects context: "Browser state may have changed..."
     • Adds continuation instructions
@@ -247,17 +251,17 @@ New session continues with preserved browser state awareness
 ## Plugin Hook Execution Order
 
 ```
-1. session.created (when session starts)
+1. session.hook("context") (on every model request)
     ↓
-2. tool.execute.before (before each tool)
+2. tool.transform (when tool descriptions are assembled)
     ↓
 3. [Tool executes - MCP Server → Extension → Browser]
     ↓
-4. tool.execute.after (after each tool)
+4. tool.hook("execute.after") (after each tool)
     ↓
-5. event (various events throughout session)
+5. event.subscribe (various events throughout session)
     ↓
-6. experimental.session.compacting (when session compacts)
+6. session.hook("compaction") (when session compacts)
 ```
 
 ## Configuration Flow
@@ -294,7 +298,7 @@ Returns error to MCP Server
     ↓
 MCP Server formats error
     ↓
-Plugin Hook (tool.execute.after) sees error
+Plugin Hook (tool.hook("execute.after")) sees error
     • Can log for debugging
     • Can transform error message
     ↓

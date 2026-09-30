@@ -328,10 +328,10 @@ If you want to modify the plugin:
 
 The plugin uses OpenCode's plugin system hooks:
 
-- `experimental.chat.system.transform`: Inject speed-oriented browser guidance
-- `tool.definition`: Add performance hints to Browser MCP tools
-- `tool.execute.after`: Post-process browser tool results
-- `experimental.session.compacting`: Preserve browser context
+- `session.hook("context")`: Inject speed-oriented browser guidance and per-tool performance hints
+- `tool.transform`: Add performance hints to Browser MCP tool descriptions
+- `tool.hook("execute.after")`: Post-process browser tool results and detect a lost extension connection
+- `session.hook("compaction")`: Preserve browser context across a compacted session
 
 ## Contributing
 

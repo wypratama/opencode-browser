@@ -79,14 +79,18 @@ Before submitting, ensure:
 ```typescript
 /**
  * Processes browser tool execution results
- * @param input - The tool execution input
- * @param output - The tool execution output
+ * @param ctx - The plugin context provided by `Plugin.define`
  */
-"tool.execute.after": async (input, output) => {
-  if (input.tool.startsWith("browsermcp_")) {
-    console.log(`Completed: ${input.tool}`)
-  }
-}
+export const BrowserMCPPlugin = Plugin.define({
+  id: "opencode-browser",
+  async setup(ctx) {
+    await ctx.tool.hook("execute.after", async (event) => {
+      if (event.tool.startsWith("browsermcp_")) {
+        console.log(`Completed: ${event.tool}`)
+      }
+    })
+  },
+})
 ```
 
 ## Submitting Changes
