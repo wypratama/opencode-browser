@@ -13,8 +13,8 @@ An OpenCode plugin that integrates [Browser MCP](https://browsermcp.io) to enabl
 ## Install
 
 ```bash
-# from this fork (no npm publish required)
-opencode plugin add github:wypratama/opencode-browser-v2
+# from this fork's default branch (no npm publish required)
+opencode plugin add github:wypratama/opencode-browser#main
 ```
 
 ## Demo
@@ -52,42 +52,50 @@ Before using this plugin, you need:
 Fastest path:
 
 ```bash
-npx opencode-browser init
+npx @wypratama/opencode-browser-v2 init
 ```
 
-This creates or updates `./opencode.json` with the required `plugin` and `mcp.browsermcp` entries while preserving any unrelated config you already have.
+This creates or updates your OpenCode config with the V2 `plugins` entry and an
+`mcp.servers.browsermcp` entry, while preserving any unrelated config you already
+have. It writes to `opencode.jsonc` or `opencode.json` — whichever already exists —
+and falls back to `opencode.json` if neither does. Existing `plugin` and
+`mcp.<name>` keys are migrated to their V2 form; a document that still uses other
+V1-only keys (`mode`, `tools`, `agent`, …) is left in V1 shape so OpenCode keeps
+reading it.
 
 For a global setup instead of a project-local one:
 
 ```bash
-npx opencode-browser init --global
+npx @wypratama/opencode-browser-v2 init --global
 ```
 
-Create or update your `opencode.json` configuration file. You can create this file in one of two locations:
+The config file can live in one of two locations:
 
-- **Global configuration** (applies to all projects): `~/.config/opencode/opencode.json`
-- **Project-specific configuration** (applies to current project only): `./opencode.json` (in your project root)
+- **Global configuration** (applies to all projects): `~/.config/opencode/opencode.json` or `opencode.jsonc`
+- **Project-specific configuration** (applies to current project only): `./opencode.json` or `./opencode.jsonc` (in your project root)
 
 Learn more about OpenCode configuration at [https://opencode.ai/docs/config](https://opencode.ai/docs/config)
 
-Add this configuration to your `opencode.json`:
+The generated configuration looks like this:
 
 ```json
 {
   "$schema": "https://opencode.ai/config.json",
-  "plugin": ["opencode-browser"],
+  "plugins": ["@wypratama/opencode-browser-v2"],
   "mcp": {
-    "browsermcp": {
-      "type": "local",
-      "command": ["npx", "-y", "@browsermcp/mcp@0.1.3"],
-      "enabled": true
+    "servers": {
+      "browsermcp": {
+        "type": "local",
+        "command": ["npx", "-y", "@browsermcp/mcp@0.1.3"],
+        "disabled": false
+      }
     }
   }
 }
 ```
 
 This configuration does two things:
-1. **Installs the plugin** - OpenCode automatically downloads `opencode-browser` from npm
+1. **Installs the plugin** - OpenCode loads `@wypratama/opencode-browser-v2`
 2. **Configures Browser MCP** - Sets up the MCP server that actually controls the browser
 
 That's it! No manual file copying required. OpenCode handles everything automatically.
@@ -97,7 +105,7 @@ The generated command pins the Browser MCP package version to avoid the extra `@
 If you prefer to preview the generated config without writing it yet:
 
 ```bash
-npx opencode-browser init --print
+npx @wypratama/opencode-browser-v2 init --print
 ```
 
 #### Alternative: Install Locally (for development/testing)
@@ -128,10 +136,12 @@ The minimal configuration requires only the MCP server setup:
 {
   "$schema": "https://opencode.ai/config.json",
   "mcp": {
-    "browsermcp": {
-      "type": "local",
-      "command": ["npx", "-y", "@browsermcp/mcp@0.1.3"],
-      "enabled": true
+    "servers": {
+      "browsermcp": {
+        "type": "local",
+        "command": ["npx", "-y", "@browsermcp/mcp@0.1.3"],
+        "disabled": false
+      }
     }
   }
 }
@@ -139,26 +149,29 @@ The minimal configuration requires only the MCP server setup:
 
 ### Advanced Configuration
 
-For more control, you can disable Browser MCP tools globally and enable them per agent:
+For more control, you can deny Browser MCP tools globally and allow them for a single agent:
 
 ```json
 {
   "$schema": "https://opencode.ai/config.json",
+  "plugins": ["@wypratama/opencode-browser-v2"],
   "mcp": {
-    "browsermcp": {
-      "type": "local",
-      "command": ["npx", "-y", "@browsermcp/mcp@0.1.3"],
-      "enabled": true
+    "servers": {
+      "browsermcp": {
+        "type": "local",
+        "command": ["npx", "-y", "@browsermcp/mcp@0.1.3"],
+        "disabled": false
+      }
     }
   },
-  "tools": {
-    "browsermcp_*": false
-  },
-  "agent": {
+  "permissions": [
+    { "action": "browsermcp_*", "resource": "*", "effect": "deny" }
+  ],
+  "agents": {
     "browser-agent": {
-      "tools": {
-        "browsermcp_*": true
-      }
+      "permissions": [
+        { "action": "browsermcp_*", "resource": "*", "effect": "allow" }
+      ]
     }
   }
 }
@@ -181,12 +194,14 @@ If you need to pass environment variables to the Browser MCP server:
 {
   "$schema": "https://opencode.ai/config.json",
   "mcp": {
-    "browsermcp": {
-      "type": "local",
-      "command": ["npx", "-y", "@browsermcp/mcp@0.1.3"],
-      "enabled": true,
-      "environment": {
-        "BROWSER_MCP_DEBUG": "true"
+    "servers": {
+      "browsermcp": {
+        "type": "local",
+        "command": ["npx", "-y", "@browsermcp/mcp@0.1.3"],
+        "disabled": false,
+        "environment": {
+          "BROWSER_MCP_DEBUG": "true"
+        }
       }
     }
   }

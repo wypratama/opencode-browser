@@ -5,6 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.1] - 2026-10-09
+
+### Fixed
+- `opencode-browser init` now writes native V2 configuration: the `plugins` array and `mcp.servers.browsermcp` with `disabled`, instead of the V1 `plugin` key and `mcp.browsermcp` with `enabled`.
+- `init` now migrates existing V1 keys (`plugin`, `mcp.<name>`, `enabled`) to their V2 form instead of leaving a mixed document behind. OpenCode V2 only runs its V1 migration shim when a document contains a V1-only key, so a config mixing V2 `plugins` with V1 `mcp.<name>` decoded as V2 and silently dropped the MCP server.
+- `init` keeps its output in V1 shape when the target document still uses other V1-only keys (`mode`, `tools`, `agent`, `provider`, `permission`, `logLevel`, and others). Writing V2 `plugins` into such a document would make OpenCode decode it as V1 and drop the entry entirely. Documents that are already V2, or that used only the old `plugin` and `mcp.<name>` keys, are upgraded to V2.
+- `init` now reads JSONC (line comments, block comments, trailing commas) and targets whichever of `opencode.jsonc` or `opencode.json` already exists, rather than always writing `opencode.json` and leaving a second, lower-priority config beside an existing `.jsonc`.
+- `init` no longer overwrites an explicit `disabled` value when re-run.
+- README documents the V2 config shape, using `permissions` and `agents` where it previously showed the V1 `tools` and `agent` keys, and uses the correct `github:wypratama/opencode-browser#main` install specifier.
+
+### Added
+- `init` warns when rewriting a file drops comments it found.
+
+### Notes
+- The `init` CLI was not broken end to end: because it emitted the V1 `plugin` key, OpenCode's V1 migration shim still handled the document. This release removes that dependency and the mixed-config failure mode.
+
 ## [2.0.0] - 2026-09-30
 
 ### Changed
